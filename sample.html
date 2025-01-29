@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Generator</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            background-image: url(' https://i.postimg.cc/HWRL8BXf/bg.png');
+            color: #333;
+        }
+
+        header {
+            background-color: #ffffff;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        .logo {
+            width: 120px; 
+            height: auto;
+            position: absolute; 
+            left: 20px;
+        }
+
+        h1 {
+            color: black;
+            text-align: center;
+            margin-left: 50px; 
+        }
+
+        .container {
+            margin: 2rem auto;
+            max-width: 800px;
+            padding: 1rem;
+            background-color: white;
+            background-image: url(' https://i.postimg.cc/HWRL8BXf/bg.png');
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .page {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .page-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .page-exit {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        button {
+            background-color: #0077cc;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem 0;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        .blog-entry {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .blog-meta {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.2rem;
+            color: #0077cc;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        input {
+            width: calc(100% - 10px);
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        label {
+    color: white;
+    margin-bottom: 3rem;
+}
+
+
+        .tone-container, .wordcount-container {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        #generatedPost {
+    color: #fffdfd; /* Change text color */
+    
+    
+
+}
+
+    
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://i.postimg.cc/fLZDwdhg/logo.png" alt="Logo" class="logo">
+        <h1>BLOG BUZZ</h1>
+    </header>
+
+    <div id="generator-page" class="container page">
+        <h1 style="color: rgb(255, 255, 255);">Blog Post Generator</h1>
+
+        <label for="topicInput">Blog Topic: </label>
+        <input type="text" id="topicInput" placeholder="Enter your blog topic here...">
+
+        <div class="tone-container">
+            <label for="languageTone"> Language Tone:</label>
+            <select id="languageTone">
+                <option value="professional">Professional</option>
+                <option value="casual">Casual</option>
+                <option value="informative">Informative</option>
+            </select>
+        </div>
+
+        <div class="wordcount-container">
+            <label for="wordCount">Word Count:</label><br>
+            <input type="number" id="wordCount" placeholder="Enter the word count" min="50" max="1000">
+        </div>
+
+        <button onclick="generateBlogPost()">Generate Blog Post</button>
+        <button onclick="showUserPage()">View Generated Blogs</button>
+
+        <div id="loading" class="loading">Generating blog post, please wait...</div>
+        <div id="generatedPost"></div>
+    </div>
+
+    <div id="user-page" class="container page hidden">
+        <h2 style="color: rgb(255, 255, 255);">Your Generated Blogs</h2>
+        <div id="blog-history"></div>
+        <button onclick="showGeneratorPage()">Back to Generator</button>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('generatedBlogs')) {
+            localStorage.setItem('generatedBlogs', JSON.stringify([]));
+        }
+
+        function showUserPage() {
+            const generatorPage = document.getElementById('generator-page');
+            const userPage = document.getElementById('user-page');
+            
+            generatorPage.classList.add('page-exit');
+            setTimeout(() => {
+                generatorPage.style.display = 'none';
+                userPage.style.display = 'block';
+                userPage.classList.add('page-enter');
+                setTimeout(() => {
+                    userPage.classList.remove('page-enter');
+                }, 50);
+            }, 300);
+            
+            displayBlogHistory();
+        }
+
+        function showGeneratorPage() {
+            const generatorPage = document.getElementById('generator-page');
+            const userPage = document.getElementById('user-page');
+            
+            userPage.classList.add('page-exit');
+            setTimeout(() => {
+                userPage.style.display = 'none';
+                generatorPage.style.display = 'block';
+                generatorPage.classList.add('page-enter');
+                setTimeout(() => {
+                    generatorPage.classList.remove('page-enter');
+                    generatorPage.classList.remove('page-exit');
+                }, 50);
+            }, 300);
+        }
+
+        function displayBlogHistory() {
+            const blogHistory = document.getElementById('blog-history');
+            const blogs = JSON.parse(localStorage.getItem('generatedBlogs'));
+            
+            if (blogs.length === 0) {
+                blogHistory.innerHTML = '<p>No blogs generated yet.</p>';
+                return;
+            }
+
+            blogHistory.innerHTML = blogs.map((blog, index) => `
+                <div class="blog-entry" style="animation-delay: ${index * 0.1}s">
+                    <div class="blog-meta">
+                        <strong>Topic:</strong> ${blog.topic}<br>
+                        <strong>Tone:</strong> ${blog.tone}<br>
+                        <strong>Word Count:</strong> ${blog.wordCount}<br>
+                        <strong>Date:</strong> ${new Date(blog.date).toLocaleString()}
+                    </div>
+                    <div class="blog-content">
+                        ${blog.content}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function generateBlogPost() {
+            const topic = document.getElementById("topicInput").value;
+            const tone = document.getElementById("languageTone").value;
+            const wordCount = document.getElementById("wordCount").value;
+            const generatedPostElement = document.getElementById("generatedPost");
+            const loadingElement = document.getElementById("loading");
+
+            if (!topic) {
+                alert("Please enter a blog post topic");
+                return;
+            }
+
+            loadingElement.style.display = "block";
+            generatedPostElement.innerHTML = "";
+
+            try {
+                const response = await fetch("http://localhost:3000/generate-blog", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ topic, tone, wordCount }),
+                });
+
+                const data = await response.json();
+                loadingElement.style.display = "none";
+
+                if (data.choices && data.choices[0].message) {
+                    const content = data.choices[0].message.content;
+                    generatedPostElement.innerHTML = content;
+
+                    // Save the generated blog locally
+                    const blogs = JSON.parse(localStorage.getItem("generatedBlogs")) || [];
+                    blogs.push({ topic, tone, wordCount, content, date: new Date().toISOString() });
+                    localStorage.setItem("generatedBlogs", JSON.stringify(blogs));
+                } else {
+                    generatedPostElement.innerHTML = "Error generating blog post. Please try again.";
+                }
+            } catch (error) {
+                loadingElement.style.display = "none";
+                generatedPostElement.innerHTML = `Error: ${error.message}`;
+                console.error("Blog Post Generation Error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
